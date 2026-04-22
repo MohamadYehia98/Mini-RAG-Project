@@ -1,0 +1,36 @@
+services:
+
+  #Esm L service
+  mongodb:
+    # L image te3eta
+    image: mongo:7-jammy
+
+    # L container ly baddo ymashe l image jowweto
+    container_name: mongoDB
+    # Ra2m l port hayda ly ana badde yee : w hayda l default
+    ports:
+      - "27007:27017"
+
+    # ween badde 5azzen l data l folder ly ana bhaddedo : l default
+    volumes:
+      - mongodata:/data/db
+
+    # hayde eza badde hot username w password lal db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+
+    # hayde eza 3nde aktar mn service badde a3mal bayneton connection
+    networks:
+      - mynetwork
+
+    # Eza 3alla2 bya3mal restart lahalo automatically
+    restart: always
+
+networks:
+    mynetwork:
+
+volumes:
+    mongodata:
+      name: mongodata
+      
