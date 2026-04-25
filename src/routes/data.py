@@ -15,7 +15,9 @@ import logging
 from .schemes.data import ProcessRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
-from models.db_schema import DataChunk
+from models.db_schema import DataChunk, Files
+from models.FileModel import FileModel
+from models.enumerations import FileTypeEnum
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -80,11 +82,25 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
 
         )
 
+    # Store the file into database
+    file_model = await FileModel.create_instance(
+        db_client = request.app.db_client
+    )
+
+    file_resource = Files(
+
+        file_project_id = project.id,
+        file_type = FileTypeEnum.FILE_TYPE,
+        file_name = file_id,
+        file_size = os.path.getsize(file_path)
+    )
+
+    file_record = await file_model.create_file(file = file_resource)
 
     return JSONResponse(
         content = {
             "signal" : ResponseSignal.FILE_UPLOAD_SUCCESS.value,
-            "file_id" : file_id,
+            "file_id" : str(file_record.id),
         
         }
     )
