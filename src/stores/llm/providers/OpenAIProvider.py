@@ -24,10 +24,10 @@ class OpenAIProvider(LLMinterface):
 
         self.client = OpenAI(
             api_key = self.api_key,
-            api_url = self.api_url,
-
-        )
-
+            base_url = self.api_url if self.api_url and len(self.api_url) else None
+            )
+        
+        self.enums = OpenAIEnum
         self.logger = logging.getLogger(__name__)
 
     def set_generation_model(self, model_id: str):
@@ -53,7 +53,7 @@ class OpenAIProvider(LLMinterface):
             self.logger.error("Generation model for OpenAI was not set")
             return None
         
-        max_output_tokens = max_output_tokens if max_output_tokens else self.default_output_max_char
+        max_output_tokens = max_output_tokens if max_output_tokens else self.default_output_max
         temperature = temperature if temperature else self.default_temp
 
         chat_history.append(
@@ -64,14 +64,14 @@ class OpenAIProvider(LLMinterface):
             model = self.generation_model_id,
             messages = chat_history,
             max_tokens = max_output_tokens,
-            temp = temperature
+            temperature = temperature
         )
 
         if not response or not response.choices or len(response.choices) == 0 or not response.choices[0].message:
             self.logger.error(" Erro while generation with OpenAI")
             return None
         
-        return response.choices[0].message["content"]
+        return response.choices[0].message.content
 
 
     def embeded_text(self, text: str, document_type: str = None):
@@ -96,10 +96,10 @@ class OpenAIProvider(LLMinterface):
         
         return response.data[0].embedding
     
-def construct_prompt(self, prompt: str, role: str):
+    def construct_prompt(self, prompt: str, role: str):
 
-    return {
-        "role" : role,
-        "content": self.process_text(prompt),
-    }
+        return {
+            "role" : role,
+            "content": self.process_text(prompt),
+        }
 

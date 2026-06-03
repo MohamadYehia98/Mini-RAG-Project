@@ -80,13 +80,14 @@ async def upload_data(request: Request, project_id: str, file: UploadFile,
                 "signal" : ResponseSignal.FILE_UPLOAD_FAILED.value,
             }
 
-        )
+        ) 
 
     # Store the file into database
     file_model = await FileModel.create_instance(
         db_client = request.app.db_client
     )
 
+    
     file_resource = Files(
 
         file_project_id = project.id,

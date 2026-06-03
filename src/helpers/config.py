@@ -7,7 +7,7 @@ class Settings(BaseSettings):
 
     APP_NAME: str
     APP_VERSION : str
-    OPEN_API_KEY : str
+    
 
     FILE_ALLOWED_TYPES : list
     FILE_MAX_SIZE : int
@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     VECTOR_DB_PATH : str
 
     VECTOR_DB_DISTANCE_METHOD : str = None
+
+    PRIMARY_LANGUAGE : str = "en"
+    DEFAULT_LANGUAGE : str = "ar"
 
 
     class Config:

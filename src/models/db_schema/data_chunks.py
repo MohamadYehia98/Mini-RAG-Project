@@ -29,3 +29,7 @@ class DataChunk(BaseModel):
                 "unique": False
             }
         ]
+
+class RetrievedAnswer(BaseModel):
+    text: str
+    score: float

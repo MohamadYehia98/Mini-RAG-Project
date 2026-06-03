@@ -1,8 +1,10 @@
 from fastapi import FastAPI
-from routes import base, data 
+from routes import base, data, nlp
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import getSettings
 from stores.llm.LLMProviderFactory import LLMProviderFactory
+from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
+from stores.llm.templates.template_parser import TemplateParser
 
 app = FastAPI()
 
@@ -11,7 +13,7 @@ app = FastAPI()
 
 
 #@app.on_event("startup")
-async def startup_db_client():
+async def startup_span():
     Settings = getSettings()
 
 # Hon aam ba3mal connection 3al mongo nafso
@@ -20,37 +22,47 @@ async def startup_db_client():
 #  Hon aam ba3mal connection 3al Database (ex. Mini-rag)
     app.db_client = app.mongo_connection[Settings.MONGODB_DATABASE]
 
-    # Hon a5adet instance mn LLMProviderFactory 
+    # Hon a5adet instance mn LLMProviderFactory wl vectordb
     llm_provider_factory = LLMProviderFactory(Settings)
+    vectordb_provider_factory = VectorDBProviderFactory(Settings)
+    
+     # Generation Client
 
-    # Generation Client
-
-    app.generation_Client = llm_provider_factory.create(provider_name = Settings.GENERATION_BACKEND)
-    app.generation_Client.set_generation_model(model_id=Settings.GENERATION_MODEL_ID)
+    app.generation_client = llm_provider_factory.create(provider_name = Settings.GENERATION_BACKEND)
+    app.generation_client.set_generation_model(model_id=Settings.GENERATION_MODEL_ID)
 
     # Embedding Client
 
-    app.embedding_Client = llm_provider_factory.create(provider_name = Settings.EMBEDDING_BACKEND)
-    app.embedding_Client.set_embedding_model(model_id = Settings.EMBEDDING_MODEL_ID,
+    app.embedding_client = llm_provider_factory.create(provider_name = Settings.EMBEDDING_BACKEND)
+    app.embedding_client.set_embedding_model(model_id = Settings.EMBEDDING_MODEL_ID,
                                               embedding_size = Settings.EMBEDDING_MODEL_SIZE)
 
+    # Vector DB client
 
+    app.vectordb_client = vectordb_provider_factory.create(provider = Settings.VECTORDB_BACKEND)
+    app.vectordb_client.connect()
+
+    app.template_parser = TemplateParser(
+        language = Settings.PRIMARY_LANGUAGE,
+        default_lang = Settings.DEFAULT_LANGUAGE
+    )
 
 
 # Hayde lahetta a3mal close lal database w shutdown lal event
 
 
 #@app.on_event("shutdown")
-async def shutdown_db_client():
+async def shutdown_span():
     app.mongo_connection.close()
+    app.vectordb_client.disconnect()
 
 # Lesh ma ba3mal events lal routes?
 # la2eno l database badde sha8lo marra wahde mafeyye kel marra sha8lo beser l server bate2 
 # amma l route kel marra badde sha8lo kel ma yegene request
 
-#hol badal ldecorators @app.on.event()
-app.router.lifespan.on_startup.append(startup_db_client)
-app.router.lifespan.on_shutdown.append(shutdown_db_client)
+app.on_event("startup")(startup_span)
+app.on_event("shutdown")(shutdown_span)
 
 app.include_router(base.base_router)
 app.include_router(data.data_router)
+app.include_router(nlp.nlp_router)
