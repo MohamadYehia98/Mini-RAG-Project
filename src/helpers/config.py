@@ -42,6 +42,8 @@ class Settings(BaseSettings):
 
     VECTORDB_BACKEND : str
     VECTOR_DB_PATH : str
+    VECTOR_DB_URL : str = None
+    VECTOR_DB_API_KEY : str = None
 
     VECTOR_DB_DISTANCE_METHOD : str = None
 

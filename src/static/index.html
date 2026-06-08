@@ -31,9 +31,9 @@
         
         .header {
             padding: 16px 20px;
-            border-bottom: 1px solid #eee;
-            background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%);
-            color: white
+            border-bottom: 1px solid #ddd;
+            background: #000;
+            color: #fff;
         }
         
         .messages {
@@ -83,10 +83,10 @@
         button {
             padding: 10px 14px;
             border-radius: 8px;
-            border: none;
-            background: #3b82f6;
-            color: white;
-            cursor: pointer
+            border: 1px solid #333;
+            background: #000;
+            color: #fff;
+            cursor: pointer;
         }
         
         button:disabled {
@@ -102,6 +102,42 @@
             display: none;
             margin-left: 8px
         }
+        /* Responsive adjustments */
+        .container {
+            margin: 16px;
+            height: auto;
+            max-height: calc(100vh - 40px);
+        }
+
+        @media (max-width: 720px) {
+            .container {
+                max-width: 100%;
+                border-radius: 6px;
+                box-shadow: none;
+            }
+
+            .header {
+                padding: 12px;
+            }
+
+            .messages {
+                padding: 12px;
+            }
+
+            .message {
+                max-width: 100%;
+            }
+
+            input[type=text] {
+                padding: 10px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 900px;
+            }
+        }
     </style>
 </head>
 
@@ -110,13 +146,9 @@
         <div class="header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
             <div>
                 <strong>AI Healthcare Assistant</strong>
-                <div class="meta">Sends queries to the backend RAG endpoint and displays answers.</div>
+                
             </div>
-            <div style="display:flex;align-items:center;gap:8px">
-                <label style="font-size:13px;color:rgba(255,255,255,0.9)">Project:</label>
-                <input id="project-input" type="text" value="1" style="padding:6px 8px;border-radius:6px;border:none;width:80px" />
-                <button id="set-project" type="button" style="padding:6px 8px;border-radius:6px;background:rgba(0,0,0,0.12)">Set</button>
-            </div>
+            <!-- Project selector removed; using default project ID -->
         </div>
 
         <div id="messages" class="messages" aria-live="polite"></div>
@@ -129,14 +161,9 @@
     </div>
 
     <script>
-        // initialize project from URL param if present
-        const params = new URLSearchParams(window.location.search);
-        const paramProject = params.get('project');
-        const projectInputEl = document.getElementById('project-input');
-        if (paramProject && projectInputEl) projectInputEl.value = paramProject;
-
-        let PROJECT_ID = (projectInputEl && projectInputEl.value) ? projectInputEl.value : '1';
-        let API_PATH = `/api/v1/nlp/rag/answer/${PROJECT_ID}`;
+        // Using fixed default project ID
+        const PROJECT_ID = '1';
+        const API_PATH = `/api/v1/nlp/rag/answer/${PROJECT_ID}`;
 
         const messagesEl = document.getElementById('messages');
         const form = document.getElementById('chat-form');
@@ -194,20 +221,7 @@
         // show a starter message
         appendMessage('bot', 'Hello — ask a question and I TRY To Find The Answer!');
 
-        // project setter
-        const setBtn = document.getElementById('set-project');
-        const projectInput = document.getElementById('project-input');
-        setBtn.addEventListener('click', () => {
-            const newId = (projectInput.value || '').trim();
-            if (!newId) return;
-            PROJECT_ID = newId;
-            API_PATH = `/api/v1/nlp/rag/answer/${PROJECT_ID}`;
-            // update browser URL without reloading
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.set('project', PROJECT_ID);
-            window.history.replaceState({}, '', newUrl);
-            appendMessage('bot', `Project set to ${PROJECT_ID}. URL updated.`);
-        });
+        // Project setter removed — using default project only
     </script>
 </body>
 

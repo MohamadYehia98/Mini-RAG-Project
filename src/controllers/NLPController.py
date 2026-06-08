@@ -3,6 +3,8 @@ from models.db_schema import Project, DataChunk
 from stores.llm.LLMEnum import DocumentTypeEnum
 from typing import List
 import json
+
+
 class NLPController(BaseController):
 
     def __init__(self, vectordb_client, generation_client, embedding_client, template_parser):
@@ -61,7 +63,7 @@ class NLPController(BaseController):
 
         # step 4: Insert Into DataBase
 
-        _ = self.vectordb_client.insert_many(
+        success = self.vectordb_client.insert_many(
 
             collection_name = Collection_name,
             texts = texts,
@@ -70,6 +72,9 @@ class NLPController(BaseController):
             record_ids = chunks_ids 
         )
 
+        if not success:
+            self.logger.error(f"Qdrant insert_many failed for collection {Collection_name}")
+            return False
 
         return True
     
